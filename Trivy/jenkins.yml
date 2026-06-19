@@ -1,0 +1,82 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "trivy-demo"
+        TRIVY_IMAGE = "aquasec/trivy:0.49.1"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/sujal-07-Ronny/SonarQube.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+
+        stage('Trivy Security Scan') {
+            steps {
+                script {
+                    // 1. Directory SetUp
+                    sh 'rm -rf trivy-reports && mkdir -p trivy-reports'
+                    
+                    echo "===== GENERATING HTML REPORT ====="
+                    
+                    sh """
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v trivy-cache:/root/.cache/ \
+                      $TRIVY_IMAGE image \
+                      --quiet \
+                      --format template \
+                      --template "@contrib/html.tpl" \
+                      --severity HIGH,CRITICAL \
+                      $IMAGE_NAME > trivy-reports/trivy-report.html
+                    """
+
+                    echo "===== SECURITY GATE: CHECKING CRITICAL ====="
+                   
+                    sh """
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v trivy-cache:/root/.cache/ \
+                      $TRIVY_IMAGE image \
+                      --severity CRITICAL \
+                      --exit-code 1 \
+                      $IMAGE_NAME
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+               
+                sh 'chmod 644 trivy-reports/trivy-report.html || true'
+                
+                if (fileExists('trivy-reports/trivy-report.html')) {
+                    echo " SUCCESS: Report found! Publishing to Dashboard..."
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'trivy-reports',
+                        reportFiles: 'trivy-report.html',
+                        reportName: 'Trivy Security Report'
+                    ])
+                } else {
+                    echo " FATAL ERROR: Report generation failed completely!"
+                }
+            }
+            archiveArtifacts artifacts: 'trivy-reports/trivy-report.html', allowEmptyArchive: true
+            sh "docker rmi $IMAGE_NAME || true"
+        }
+    }
+}
