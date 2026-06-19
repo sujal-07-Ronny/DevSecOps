@@ -66,16 +66,3 @@ Security & Quality Reports
 
 ---
 
-## Screenshots
-
-### Trivy Scan Results
-
-![Trivy](Trivy/screenshots/trivy.png)
-
-### SonarQube Dashboard
-
-![SonarQube](SonarQube/screenshots/sonarqube.png)
-
-### Pipeline Execution
-
-![Pipeline](screenshots/pipeline.png)
