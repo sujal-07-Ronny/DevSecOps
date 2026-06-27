@@ -1,4 +1,4 @@
-# 🔐 Automated Secure Software Delivery Pipeline | Jenkins + SonarQube + Trivy + Docker
+# 🔐 DevSecOps Security Pipeline | Jenkins + SonarQube + Trivy + Docker
 
 ![Jenkins](https://img.shields.io/badge/CI%2FCD-Jenkins-red?logo=jenkins)
 ![SonarQube](https://img.shields.io/badge/Code%20Quality-SonarQube-blue?logo=sonarqube)
@@ -10,29 +10,44 @@
 
 ## 📌 Overview
 
-A fully automated **DevSecOps CI/CD pipeline** built with Jenkins that integrates **SonarQube** for static code analysis and **Trivy** for container image vulnerability scanning — with security gates that **block builds** when HIGH or CRITICAL vulnerabilities are detected.
+This project demonstrates **two independent Jenkins CI/CD pipelines** built for better understanding of DevSecOps security tools — one focused on **SonarQube** (code quality & static analysis) and one focused on **Trivy** (container image vulnerability scanning).
 
-> ⚠️ Infrastructure is torn down to avoid costs. All pipeline configs, Jenkinsfile, and screenshots are preserved in this repo.
+> ⚠️ Infrastructure is torn down to avoid costs. All pipeline configs and screenshots are preserved in this repo.
 
 ---
 
-## 🏗️ Pipeline Architecture
+## 🏗️ Pipeline 1 — SonarQube (Code Quality & SAST)
 
 ```
 Developer pushes code
         ↓
-Jenkins CI/CD Pipeline triggers
+Jenkins Pipeline triggers
         ↓
-SonarQube — Static Code Analysis
-(Code smells, bugs, vulnerabilities)
+SonarQube Static Code Analysis
+(bugs, code smells, security vulnerabilities)
+        ↓
+Quality Gate Check
+        ↓
+✅ Pass → Pipeline Success
+🚫 Fail → Pipeline Blocked
+```
+
+## 🏗️ Pipeline 2 — Trivy (Container Image Security)
+
+```
+Developer pushes code
+        ↓
+Jenkins Pipeline triggers
         ↓
 Docker Image Build
         ↓
-Trivy — Container Image Scan
-(HIGH & CRITICAL vulnerability check)
+Trivy Image Scan
+(HIGH & CRITICAL vulnerability detection)
         ↓
-🚫 Security Gate: HIGH/CRITICAL found? → Pipeline FAILS
-✅ Security Gate: Clean? → Image Delivered
+Security Gate Check
+        ↓
+✅ Clean image → Delivered
+🚫 HIGH/CRITICAL found → Pipeline FAILS & Blocked
 ```
 
 ---
@@ -43,7 +58,7 @@ Trivy — Container Image Scan
 |---|---|
 | CI/CD | Jenkins |
 | Code Quality & SAST | SonarQube |
-| Container Security | Trivy |
+| Container Security Scanning | Trivy |
 | Containerization | Docker |
 | Version Control | Git |
 
@@ -51,36 +66,47 @@ Trivy — Container Image Scan
 
 ## 🎯 What Was Implemented
 
-- ✅ Built **Jenkins CI/CD pipeline** to automate source code integration and Docker image creation
-- ✅ Integrated **SonarQube** for static code analysis — detects bugs, code smells, and security vulnerabilities
-- ✅ Implemented **Trivy image scanning** to detect HIGH and CRITICAL vulnerabilities before delivery
-- ✅ Enforced **security gates** — pipeline blocked automatically when HIGH/CRITICAL issues found
-- ✅ Demonstrated both **pipeline failure** (vulnerabilities detected) and **pipeline success** (clean image) scenarios
+**Pipeline 1 — SonarQube:**
+- ✅ Jenkins pipeline integrated with **SonarQube** for automated static code analysis
+- ✅ Detects bugs, code smells, and security vulnerabilities in source code
+- ✅ **Quality Gate** enforced — pipeline blocks if code does not meet standards
+
+**Pipeline 2 — Trivy:**
+- ✅ Jenkins pipeline builds Docker image and runs **Trivy vulnerability scan**
+- ✅ Scans for **HIGH and CRITICAL** CVEs in container image layers
+- ✅ **Security Gate enforced** — build blocked automatically on HIGH/CRITICAL findings
+- ✅ Demonstrated both failure (vulnerable image) and success (clean image) scenarios
 
 ---
 
-## 📸 Project Screenshots
+## 📸 Screenshots
 
-### 🔴 Trivy — Pipeline Failed (HIGH/CRITICAL Vulnerabilities Detected)
-![Failed Pipeline](Trivy/OutPut/Failed%20Pipeline.png)
+### 🔵 Pipeline 1 — SonarQube
 
-### 🛡️ Trivy — Security Gate Blocking Build
-![Security Gate](Trivy/OutPut/Security%20Gate.png)
-
-### 📋 Trivy — Vulnerability Report
-![Trivy Report](Trivy/OutPut/Report.png)
-
-### 📊 Trivy — Vulnerability Table
-![Table of Vulnerabilities](Trivy/OutPut/Table%20of%20vul.png)
-
-### ✅ SonarQube — Pipeline Success
+#### ✅ Pipeline Success
 ![Success Pipeline](SonarQube/OutPut/success%20pipeline.png)
 
-### 📈 SonarQube — Dashboard
+#### 📈 SonarQube Dashboard
 ![SonarQube Dashboard](SonarQube/OutPut/Dashboard.png)
 
-### 📝 SonarQube — Success Logs
+#### 📝 Success Logs
 ![Success Logs](SonarQube/OutPut/Success%20logs.png)
+
+---
+
+### 🔴 Pipeline 2 — Trivy
+
+#### 🚫 Pipeline Failed (HIGH/CRITICAL Vulnerabilities Detected)
+![Failed Pipeline](Trivy/OutPut/Failed%20Pipeline.png)
+
+#### 🛡️ Security Gate Blocking Build
+![Security Gate](Trivy/OutPut/Security%20Gate.png)
+
+#### 📋 Vulnerability Report
+![Trivy Report](Trivy/OutPut/Report.png)
+
+#### 📊 Vulnerability Table
+![Table of Vulnerabilities](Trivy/OutPut/Table%20of%20vul.png)
 
 ---
 
@@ -110,30 +136,6 @@ DevSecOps/
 |---|---|
 | SonarQube not connecting to Jenkins | Configured SonarQube token in Jenkins credentials manager |
 | Trivy not blocking pipeline on HIGH findings | Added `--exit-code 1` flag to Trivy scan command |
-| Docker build failing inside Jenkins | Fixed by adding Jenkins user to docker group |
-
----
-
-## 🔁 How to Reproduce
-
-```bash
-# 1. Start Jenkins and SonarQube (Docker)
-docker run -d -p 8080:8080 jenkins/jenkins:lts
-docker run -d -p 9000:9000 sonarqube:community
-
-# 2. Install Jenkins plugins
-# - SonarQube Scanner
-# - Docker Pipeline
-
-# 3. Configure SonarQube token in Jenkins credentials
-
-# 4. Create Jenkins pipeline and add Jenkinsfile
-
-# 5. Trivy scan in pipeline stage
-trivy image --exit-code 1 --severity HIGH,CRITICAL your-image:tag
-
-# 6. Push code → Pipeline triggers automatically
-```
 
 ---
 
@@ -142,7 +144,24 @@ trivy image --exit-code 1 --severity HIGH,CRITICAL your-image:tag
 - **Shift-Left Security** — security checks happen early in pipeline, not after deployment
 - **Security as Code** — vulnerability thresholds enforced automatically, no manual checks
 - **Quality Gates** — code cannot proceed if it fails SonarQube or Trivy standards
-- **Fail Fast** — pipeline stops immediately on HIGH/CRITICAL findings, saving time and cost
+- **Fail Fast** — pipeline stops immediately on HIGH/CRITICAL findings
+
+---
+
+## 🔁 How to Reproduce
+
+```bash
+# Pipeline 1 — SonarQube Setup
+docker run -d -p 8080:8080 jenkins/jenkins:lts
+docker run -d -p 9000:9000 sonarqube:community
+# Configure SonarQube token in Jenkins → Create pipeline → Run
+
+# Pipeline 2 — Trivy Setup
+docker run -d -p 8080:8080 jenkins/jenkins:lts
+# Install Trivy on Jenkins server
+# Create pipeline with Docker build + Trivy scan stage
+trivy image --exit-code 1 --severity HIGH,CRITICAL image:tag
+```
 
 ---
 
