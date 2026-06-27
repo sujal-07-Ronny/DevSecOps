@@ -46,7 +46,7 @@ Features:
 
 Developer Code
 ↓
-GitLab CI/CD Pipeline
+Jenkins CI/CD Pipeline
 ↓
 SonarQube Code Analysis
 ↓
