@@ -12,7 +12,10 @@
 
 This project demonstrates **two independent Jenkins CI/CD pipelines** built for better understanding of DevSecOps security tools — one focused on **SonarQube** (code quality & static analysis) and one focused on **Trivy** (container image vulnerability scanning).
 
-> ⚠️ Infrastructure is torn down to avoid costs. All pipeline configs and screenshots are preserved in this repo.
+> ⚠️ Cloud infrastructure intentionally deprovisioned 
+> post-testing to optimize costs — a real-world 
+> FinOps practice. All pipeline configs, Jenkinsfiles, 
+> and output screenshots are preserved in this repo.
 
 ---
 
